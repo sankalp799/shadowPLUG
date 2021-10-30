@@ -13,6 +13,7 @@ const cors = require('cors');
 const indexRoute = require('./router/index'); 
 const logger = require('./.lib/logger');
 const helper = require('./.lib/dev');
+// const bodyParser = require('body-parser');
 
 let app = express();
 let server = http(app);
@@ -34,6 +35,7 @@ io.on('connection', (socket) => {
 
 // express middleware
 app.use(cors());
+// app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 app.use(express.json({ limit: '100mb' }));
 app.use(logger);

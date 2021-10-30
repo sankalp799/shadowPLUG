@@ -99,4 +99,24 @@ dev.data.find = (id, callback) => {
 // dev.data.find('123-321', (exist) => exist ? console.log(1) : console.log(0));
 
 
+dev.data.getRoom = (id, callback) => {
+    let baseDir = path.join(__dirname, `../.data/rooms/${id}.json`);
+    fs.readFile(baseDir, (err, data) => {
+        if(!err && data){
+            try{
+                let room = JSON.parse(data);
+                callback(false, room);
+            }catch(e){
+                callback(true);
+                console.log(`[ERROR] failed to fetch room data - ${e.message}`);
+            }
+        }else{
+            callback(true);
+        }
+    })
+}
+
+
+
+
 module.exports = dev;

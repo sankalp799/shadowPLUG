@@ -1,4 +1,12 @@
 extends base.pug
 
 block mainContent
-    h1 JOIN
+    form(id='JoinRoom' method='POST')
+        div
+            label username
+            input(type='text' name='username')
+        div
+            input(type='submit' name='submit' value='join')
+    div #{Error}
+
+
