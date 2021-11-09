@@ -1,6 +1,11 @@
 extends base.pug
 
 block mainContent
-    div #{users}
-    div #{chats}
-    div #{username}
+    div username: #{username}
+    div friends
+        each u in users
+            div
+                div= u.id
+                div= u.username
+    script(src='/socket.io/socket.io.js')
+    script(type='text/javascript' defer src='/static/js/app.js')

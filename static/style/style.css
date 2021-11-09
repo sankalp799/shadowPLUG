@@ -6,4 +6,7 @@
     border-sizing: content-box;
 }
 
-
+#form-avatar{
+    width: 10vw;
+    height: 10vh;
+}

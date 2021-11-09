@@ -14,15 +14,20 @@ const indexRoute = require('./router/index');
 const logger = require('./.lib/logger');
 const helper = require('./.lib/dev');
 // const bodyParser = require('body-parser');
+const FULL_DUPLEX_HANDLER = require(process.env.DUPLEX_FILE + '');
 
 let app = express();
 let server = http(app);
 let CPUs = os.cpus().length;
-let io = socketio(server);
+let io = new socketio.Server(server, {
+    transport: ['websocket'],
+    path: '',
+});
 
+FULL_DUPLEX_HANDLER(io);
 app.set('views', './template');
 app.set('view engine', 'pug');
-app.set('socketio', io);
+// app.set('socketio', io);
 
 /*
 io.on('connection', (socket) => {
