@@ -47,11 +47,24 @@ app.use(logger);
 app.use('/api/v1/room', roomRoute);
 app.use('/', indexRoute);
 
+
+app.get('/test/j', (req, res) => {
+    res.status(200).render('join', {
+        Error: 'for frontend design',
+        title: 'test',
+    })
+})
+
+app.get('/test/c', (req, res) => {
+    res.status(200).render('chat', {})
+})
+
+
+
 app.use((req, res, next) => {
     res.redirect('/404');
     // res.status(404).json({ok: false, message: '404 Not Found'});
 });
-
 
 if(cluster.isMaster) {
     console.log(`Primary ${process.pid} is running`);
@@ -67,6 +80,6 @@ if(cluster.isMaster) {
     server.listen(process.env.PROT || 3000, err => {
         !err ? console.log(`Listening to port: ${process.env.PORT || 3000} & ProcessID: ${process.pid}`) : console.log(`[ERROR] ${err.message}`);
         
-        setTimeout(helper.roomRenewWorker, 3000);
+        // setTimeout(helper.roomRenewWorker, 1000);
     });
 }

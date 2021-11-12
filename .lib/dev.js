@@ -40,61 +40,6 @@ dev.data.create = (room, callback) => {
     })
 }
 
-let renewRoom = async (r) => {
-    try{
-        await fs.readFile(dev.data.baseDir, async (err, data) => {
-            if(!err && data){
-                let dataStr = JSON.parse(data);
-                if((Date.now() - dataStr.createdAt) > (30 * 60 * 1000)){
-                    if(dataStr.users.length > 0){
-                        //extend by 30 min
-                        dataStr.createdAt = Date.now();
-                        dataStr = JSON.stringify(dataStr);
-
-                        await fs.writeFile(dirPath, dataStr, async (err) => {
-                            if(!err)
-                                console.log(`[ROOM] ${r} renewed`);
-                            else
-                                console.log(`[ROOM] failed to renewed and write ${r}`)
-                        })
-                    }else{
-                        // delete room data
-                        await fs.unlink(dirPath, async (err) => {
-                            if(!err)
-                                console.log(`[ROOM] ${r} deleted`);
-                            else
-                                console.log(`[ROOM] failed to delete ${r}`);
-                        })
-                    }    
-                }
-            }else{
-                console.log(`[ERROR] ${err}`);
-            }
-        })
-    }catch(e){
-        console.log(`[ERROR] ${e}`)
-    }
-} 
-
-dev.roomRenewWorker = async () => {
-    setInterval(async () => {
-        try{
-            await fs.readdir(dev.data.baseDir, async (err, data) => {
-                
-                if(!err && data){
-                    data.forEach(renewRoom);
-                }else{
-                    
-                    console.log('[ERROR] Failed fetch rooms from dir');
-                    console.error(err);
-                }
-            })
-        }catch(e){
-            console.log(`[ERROR] ${e}`);
-        }
-    }, 2 * 60 * 1000);
-
-}
 
 // dev.roomRenewWorker();
 
@@ -133,5 +78,59 @@ dev.data.updateRoom = (roomData, callback) => {
     })
 }
 
+
+let renewRoom = async (r) => {
+    try{
+        dev.data.getRoom(r, (err, data) => {
+            if(!err && data){
+                let extend = (Date.now() - data.createdAt) < (60 * 60 * 1000);
+                if(extend && data.users.length > 0){
+                    dev.log('WORKER> ', `${data.id}.json verified`);
+                }else if(data.users.length > 0 && !extend){
+                    // extend time
+                    data.createdAt = Date.now();
+                    dev.data.updateRoom(data, (err) => {
+                        !err ? dev.log('WORKER> ', `${data.id}.json extended successfully`) : setTimeout(() => renewRoom(r), 10 * 1000);
+                    });
+                }else{
+                    // else remove 
+                    fs.unlink(dev.data.baseDir + r + '.json', (done) => {
+                        // console.log(done);
+                        !done ? dev.log('WORKER> ', `${r}.json expired and removed.`) : dev.log('WORKER> ', `${r}.json go expired but, failed to remove file`); 
+                    })
+                }
+            }else{
+                dev.log('WORDER> ', 'failed to get room data from ' + r + '.json');
+            }
+        }) 
+    }catch(e){
+        console.log(`[ERROR] ${e}`)
+    }
+} 
+
+// renewRoom('b352a158-54a2-4f1d-8602-efce626443c7');
+
+dev.roomRenewWorker = async () => {
+    setInterval(async () => {
+        dev.log('WORDER> ', 'File Inspection Started');
+        try{
+            await fs.readdir(dev.data.baseDir, async (err, data) => { 
+                if(!err && data){
+                    // console.log(data);
+                    data.forEach((f) => {
+                        let id = f.toString().split('.')[0];
+                        renewRoom(id);
+                    });
+                }else{ 
+                    console.log('[ERROR] Failed fetch rooms from dir');
+                    console.error(err);
+                }
+            })
+        }catch(e){
+            console.log(`[ERROR] ${e}`);
+        }
+    }, 1 * 60 * 1000);
+
+}
 
 module.exports = dev;

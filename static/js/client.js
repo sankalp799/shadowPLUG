@@ -2,6 +2,7 @@ window.onload = () => {
     if(location.pathname.split('/')[1] == 'join'){
         let id = window.location.pathname.split('/');
         id = id[id.length - 1];
+        document.querySelector('.route-heading').innerHTML += `<br /> <h6>${id}</h6>`;
         sessionStorage.setItem('id', id);
         console.log('form action: /' + id);
         document.querySelector('form').action = '/' + id;
@@ -37,7 +38,7 @@ window.onload = () => {
                 })
                 .then(data => {
                     sessionStorage.setItem('id', data.id);
-                    document.getElementById('link_view').innerText = data.link;
+                    document.getElementById('roomLink').innerText = data.link;
                 })
                 .catch(err => {
                     document.getElementById('link_view').innerText = 'Server Not Responding';
@@ -45,4 +46,3 @@ window.onload = () => {
         });
     }
 }
-

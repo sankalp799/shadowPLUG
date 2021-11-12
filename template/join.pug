@@ -1,14 +1,14 @@
 extends base.pug
 
 block mainContent
-    div
+    canvas(id='home-bg-canvas')
+    div(class='join-wrapper')
+        div(class='route-heading') #{header}
         img(src='https://avatars.dicebear.com/api/micah/random.svg' id='form-avatar')
-    form(id='JoinRoom' method='POST')
-        div
-            label username
-            input(type='text' name='username' id='username-input')
-        div
-            input(type='submit' name='submit' value='join')
-    div #{Error}
-
+        form(id='JoinRoom' method='POST')
+            div
+                input(type='text' name='username' id='username-input' placeholder='username')
+            div
+                input(type='submit' name='submit' value='join')
+        div #{Error}
 

@@ -2,7 +2,7 @@ extends base
 
 block mainContent
     div(class='home-container')
-        div
-            button(id='createRoomBtn') Create
-        div(id='link_view')
-
+        canvas(id='home-bg-canvas')
+        div(class='route-heading') #{header}
+        button(id='createRoomBtn') Create
+        div(id='roomLink')

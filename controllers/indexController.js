@@ -7,6 +7,7 @@ const Peer = require('../models/user');
 module.exports.home = (req, res) => {
 res.status(200).render('index', {
     title: _config.title,
+    header: 'Create Room',
     })
 }
 
@@ -29,6 +30,7 @@ module.exports.join = (req, res) => {
                 Error: err,
                 id: req.params.id,
                 title: _config.title,
+                header: 'Join',
             })
         }else{
             res.status(404).redirect('/404');
