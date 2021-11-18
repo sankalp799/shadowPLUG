@@ -4,8 +4,31 @@ block mainContent
     div(class='home-container')
         canvas(id='home-bg-canvas')
         div(id='profiles' class='profile-view')
+            
+            div(class='user-profile')
+                img(src='https://avatars.dicebear.com/api/open-peeps/random.svg')
+                span(class='user-profile-name') scorpcruze  
+            div(class='user-profile')
+                img(src='https://avatars.dicebear.com/api/open-peeps/random.svg')
+                span(class='user-profile-name') opty_06  
+            
         div(class='main-interface')
+            div(class='sys-user-profile')
+                img(src='https://avatars.dicebear.com/api/open-peeps/shadowgeek.svg' width='50' height='50')
+                span Shadowgeek 
             div(class='chat-panel')
+
+                div(class='chat-panel-message')
+                    div(class='chat-panel-message-about-sender')
+                        img(class='chat-panel-message-about-sender-img')
+                        span(class='chat-panel-message-about-sender-name') shadowgeek 
+                        span(class='chat-panel-message-more') ...
+                    div(class='chat-panel-message-content') hey! 
+                    div(class='chat-panel-message-at') 5:00 PM
+
             div(class='chat-ui')
+                div 
+                    input(type='text' name='chat-field' id='chatField' placeholder='')
+                    button(id='chat-send-btn') Send
     script(src='/socket.io/socket.io.js')
     script(type='text/javascript' defer src='/static/js/app.js')

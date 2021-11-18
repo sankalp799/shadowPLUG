@@ -7,7 +7,7 @@ window.onload = () => {
         console.log('form action: /' + id);
         document.querySelector('form').action = '/' + id;
         
-        let avatar_url = 'https://avatars.dicebear.com/api/micah/';
+        let avatar_url = 'https://avatars.dicebear.com/api/open-peeps/';
         let avatar_viewer = document.querySelector('#form-avatar');
         let joinForm = document.querySelector('form');
         let username_field = document.getElementById('username-input')
@@ -26,7 +26,7 @@ window.onload = () => {
     if(location.pathname.split('/')[1] == ''){
         document.querySelector('#createRoomBtn').addEventListener('click', (evt) => {
             evt.preventDefault();
-            let requestURL = new Request('/api/v1/room/create');
+            let requestURL = new Request(location.origin + '/api/v1/room/create');
             let h = new Headers();
             h.append('Accept', 'application/json');
             fetch(requestURL, {

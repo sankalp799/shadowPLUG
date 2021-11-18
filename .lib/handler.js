@@ -1,33 +1,32 @@
 const helper = require('./dev');
 
 let onDisconnect = async (socket, io) => {
-    try{
-        await helper.data.getRoom(socket.handshake.auth.id, async (error, data) => {
-            if(!error && data){
-                let roomID = socket.handshake.auth.id;
-                let dis_socket_index = await data.users.findIndex(u => u.id == socket.id);
-                let disconnect_socket = await data.users.splice(dis_socket_index, 1);
-                socket.disconnect();
-                await helper.log('SOCKET> ', `${disconnect_socket.id} - ${disconnect_socket.username} got disconnected`);
-                io.to(data.id).emit('server', `${disconnect_socket.username} leaved`);
-                await helper.data.updateRoom(data, async (DONE) => {
-                    if(!DONE){
-                        await helper.log('USER> ', `${disconnect_socket.id} disconnected from room ${data.id}.json`);
-                        socket.disconnect();
-                        broadCastUserList(roomID, io, 0);
-                    }else{
-                        socket.disconnect();
-                        await helper.log('USER> ', `failed to remove ${disconnect_socket.id} from ${data.id}.json`);
-                    }
-                })
-            }else{
-                socket.disconnect();
+    console.dir('SOCKET> ', socket);
+
+    // transporter closed could not access socket data
+    io.to(socket.roomID).emit('server', `${socket.username} leaved.`);
+    
+    // get room data
+    helper.data.getRoom(socket.roomID, (err, data) => {
+        if(!err && data){
+            let dis_index = data.users.findIndex(u => u.id == socket.id);
+            try{
+                let removed = data.users.splice(dis_index, 1);
+                if(removed){
+                    // update data
+                    helper.data.updateRoom(data, (error_u) => {
+                        !error_u ? helper.log('SOCKET> ', `${socket.username} leaved`) : helper.log('SOCKET> ', `failed to update room data`);
+                    })
+                }else{
+                    helper.log('SOCKET> ', 'failed to remove ' + socket.username);
+                }
+            }catch(e){
+                helper.log('SOCKET> ', e);
             }
-        })
-    }catch(e){
-        socket.disconnect();
-        console.error(e);
-    }
+        }else{
+            helper.log('SOCKET> ', err);
+        }
+    })
 }
 
 let CLI_CHECK = async (msg, callback) => {
@@ -35,11 +34,12 @@ let CLI_CHECK = async (msg, callback) => {
 }
 
 let processChat = async (socket, data) => {
+    console.log(data);
     CLI_CHECK(data.message, async (error) => {
         if(!error){
             // data['init'] = moment().format('LT');
             data['sender'] = socket.username;
-            socket.to(socket.handshake.auth.id).emit('chat', data);
+            socket.broadcast.to(data.room).emit('chat', data);
         }
     })    
 }
@@ -64,16 +64,18 @@ let broadCastUserList = async (roomID, io, times) => {
 
 module.exports.onConnection = (socket, io) => {
     let roomID = socket.handshake.auth.id.toString().trim();
-    
+    socket['roomID'] = roomID;
+
     // join roomID room
     socket.join(roomID);
-    socket.to(roomID).emit('server', `${socket.handshake.auth.username} joined`);
+    io.to(roomID).emit('new user', socket.username);
+    io.to(roomID).emit('server', `${socket.handshake.auth.username} joined`);
     broadCastUserList(roomID, io, 0);
 
-    socket.on('chat', data => processChat(roomID, io));
+    socket.on('chat', data => processChat(socket, data));
 
     // get socket obj removed from io and files too
-    socket.on('disconnect', (socket) => onDisconnect(socket, io)); 
+    socket.on('disconnect', (reason) => onDisconnect({roomID, username: socket.username, id: socket.id}, io)); 
 }
 
 module.exports.authSocket = (socket, next) => {
@@ -86,7 +88,7 @@ module.exports.authSocket = (socket, next) => {
                 room.users.forEach(u => {
                     if(u.username == username && u.id == null){
                         u.id = socket.id;
-                        socket.username = username;
+                        socket['username'] = username;
                         DONE=true;
                     }
                 });

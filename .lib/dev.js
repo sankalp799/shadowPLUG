@@ -13,8 +13,8 @@ dev.data.create = (room, callback) => {
     fs.open(dev.data.baseDir + room.id + '.json', 'wx', (error, fileDescriptor) => {
         if(!error && fileDescriptor){
             try{
-                let roomString = JSON.stringify(room);
-                console.log(roomString);
+                let roomString = JSON.stringify(room, null, 2);
+               
                 fs.writeFile(fileDescriptor, roomString, err => {
                     if(!err){
                         fs.close(fileDescriptor, err => {
@@ -67,7 +67,7 @@ dev.data.getRoom = (id, callback) => {
 }
 
 dev.data.updateRoom = (roomData, callback) => {
-    let roomStr = JSON.stringify(roomData);
+    let roomStr = JSON.stringify(roomData, null, 2);
     fs.writeFile(dev.data.baseDir + roomData.id + '.json', roomStr, (error) => {
         if(!error){
             callback(false);
@@ -84,6 +84,7 @@ let renewRoom = async (r) => {
         dev.data.getRoom(r, (err, data) => {
             if(!err && data){
                 let extend = (Date.now() - data.createdAt) < (60 * 60 * 1000);
+                console.log('WORKER> ', extend);
                 if(extend && data.users.length > 0){
                     dev.log('WORKER> ', `${data.id}.json verified`);
                 }else if(data.users.length > 0 && !extend){

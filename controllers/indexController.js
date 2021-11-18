@@ -53,7 +53,7 @@ module.exports.getRoom = (req, res) => {
     if(username){
         helper.data.getRoom(id, (err, room) => {
             if(!err && room){
-                room.users.push(new Peer(username, undefined));
+                room.users.push(new Peer(username));
                 helper.data.updateRoom(room, (error) => {
                     if(!error){
                         res.status(200).render('chat', {
